@@ -37,21 +37,6 @@ pub const CHECK_POINT_WINDOW: u64 = (MAX_BLOCKS_IN_TRANSIT_PER_PEER * 4) as u64;
 
 pub(crate) const LOG_TARGET_RELAY: &str = "ckb-relay";
 
-use ckb_network::ProtocolId;
-
-pub enum NetworkProtocol {
-    SYNC = 100,
-    RELAY = 101,
-    TIME = 102,
-    ALERT = 110,
-}
-
-impl Into<ProtocolId> for NetworkProtocol {
-    fn into(self) -> ProtocolId {
-        (self as usize).into()
-    }
-}
-
 //  Timeout = base + per_header * (expected number of headers)
 pub const HEADERS_DOWNLOAD_TIMEOUT_BASE: u64 = 6 * 60 * 1000; // 6 minutes
 pub const HEADERS_DOWNLOAD_TIMEOUT_PER_HEADER: u64 = 1; // 1ms/header

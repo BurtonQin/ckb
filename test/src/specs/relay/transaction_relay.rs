@@ -1,6 +1,6 @@
 use crate::utils::{build_relay_tx_hashes, build_relay_txs, sleep, wait_until};
 use crate::{Net, Spec, TestProtocol, DEFAULT_TX_PROPOSAL_WINDOW};
-use ckb_sync::{NetworkProtocol, RETRY_ASK_TX_TIMEOUT_INCREASE};
+use ckb_network::SupportProtocols;
 use ckb_types::{
     core::{Capacity, TransactionBuilder},
     packed::{CellInput, GetRelayTransactions, OutPoint, RelayMessage},
@@ -146,6 +146,9 @@ impl Spec for TransactionRelayMultiple {
 
 pub struct TransactionRelayTimeout;
 
+// test same value as ckb_sync::RETRY_ASK_TX_TIMEOUT_INCREASE
+const RETRY_ASK_TX_TIMEOUT_INCREASE: Duration = Duration::from_secs(30);
+
 impl Spec for TransactionRelayTimeout {
     crate::name!("get_relay_transaction_timeout");
 
@@ -163,7 +166,7 @@ impl Spec for TransactionRelayTimeout {
         let dummy_tx = TransactionBuilder::default().build();
         info!("Sending RelayTransactionHashes to node");
         net.send(
-            NetworkProtocol::RELAY.into(),
+            SupportProtocols::Relay.protocol_id(),
             pi,
             build_relay_tx_hashes(&[dummy_tx.hash()]),
         );
@@ -205,7 +208,7 @@ impl Spec for RelayInvalidTransaction {
         let dummy_tx = TransactionBuilder::default().build();
         info!("Sending RelayTransactionHashes to node");
         net.send(
-            NetworkProtocol::RELAY.into(),
+            SupportProtocols::Relay.protocol_id(),
             pi,
             build_relay_tx_hashes(&[dummy_tx.hash()]),
         );
@@ -221,7 +224,7 @@ impl Spec for RelayInvalidTransaction {
         );
         info!("Sending RelayTransactions to node");
         net.send(
-            NetworkProtocol::RELAY.into(),
+            SupportProtocols::Relay.protocol_id(),
             pi,
             build_relay_txs(&[(dummy_tx, 333)]),
         );

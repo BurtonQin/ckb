@@ -1,15 +1,14 @@
 use crate::block_status::BlockStatus;
 use crate::orphan_block_pool::OrphanBlockPool;
-use crate::BLOCK_DOWNLOAD_TIMEOUT;
-use crate::{NetworkProtocol, SUSPEND_SYNC_TIME};
 use crate::{
-    FIRST_LEVEL_MAX, INIT_BLOCKS_IN_TRANSIT_PER_PEER, MAX_BLOCKS_IN_TRANSIT_PER_PEER,
-    MAX_HEADERS_LEN, MAX_TIP_AGE, RETRY_ASK_TX_TIMEOUT_INCREASE,
+    BLOCK_DOWNLOAD_TIMEOUT, FIRST_LEVEL_MAX, INIT_BLOCKS_IN_TRANSIT_PER_PEER,
+    MAX_BLOCKS_IN_TRANSIT_PER_PEER, MAX_HEADERS_LEN, MAX_TIP_AGE, RETRY_ASK_TX_TIMEOUT_INCREASE,
+    SUSPEND_SYNC_TIME,
 };
 use ckb_chain::chain::ChainController;
 use ckb_chain_spec::consensus::Consensus;
 use ckb_logger::{debug, debug_target, error, metric};
-use ckb_network::{CKBProtocolContext, PeerIndex};
+use ckb_network::{CKBProtocolContext, PeerIndex, SupportProtocols};
 use ckb_shared::{shared::Shared, Snapshot};
 use ckb_store::{ChainDB, ChainStore};
 use ckb_types::{
@@ -1676,7 +1675,11 @@ impl ActiveChain {
             .hash_stop(packed::Byte32::zero())
             .build();
         let message = packed::SyncMessage::new_builder().set(content).build();
-        if let Err(err) = nc.send_message(NetworkProtocol::SYNC.into(), peer, message.as_bytes()) {
+        if let Err(err) = nc.send_message(
+            SupportProtocols::Sync.protocol_id(),
+            peer,
+            message.as_bytes(),
+        ) {
             debug!("synchronizer send get_headers error: {:?}", err);
         }
     }

@@ -1,6 +1,6 @@
 use crate::utils::wait_until;
 use crate::{Net, Spec, TestProtocol};
-use ckb_sync::{NetworkProtocol, MAX_LOCATOR_SIZE};
+use ckb_network::SupportProtocols;
 use ckb_types::{
     h256,
     packed::{Byte32, GetHeaders, SyncMessage},
@@ -10,6 +10,9 @@ use ckb_types::{
 use log::info;
 
 pub struct InvalidLocatorSize;
+
+// test same value as ckb_sync::MAX_LOCATOR_SIZE;
+const MAX_LOCATOR_SIZE: usize = 101;
 
 impl Spec for InvalidLocatorSize {
     crate::name!("invalid_locator_size");
@@ -37,7 +40,7 @@ impl Spec for InvalidLocatorSize {
             .build()
             .as_bytes();
 
-        net.send(NetworkProtocol::SYNC.into(), peer_id, message);
+        net.send(SupportProtocols::Sync.protocol_id(), peer_id, message);
 
         let rpc_client = net.nodes[0].rpc_client();
         let ret = wait_until(10, || rpc_client.get_peers().is_empty());
